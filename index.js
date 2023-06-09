@@ -3,7 +3,7 @@ const app = expresss ();
 require('dotenv').config()
 const cors = require("cors")
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 app.use(cors())
@@ -29,6 +29,7 @@ async function run() {
     const academieInstructorsCollection = client.db("sports_academies").collection("academies_instructors");
     const classeCollection = client.db("sports_academies").collection("classe");
     const usersCollection = client.db("sports_academies").collection("users");
+    const selectCollection = client.db("sports_academies").collection("selects");
     
     // academie Instructors data get
     app.get("/instructors",async(req,res)=>{
@@ -75,6 +76,15 @@ async function run() {
       const result = await classeCollection.updateOne(filter,updateDoc)
     res.send(result)
     })
+
+     // academie set selects data
+     app.post("/selects",async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id : new ObjectId(id)};
+      const result = await selectCollection.insertOne(filter);
+      res.send(result)
+     })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
