@@ -84,6 +84,11 @@ async function run() {
       const result = await selectCollection.insertOne(filter);
       res.send(result)
      })
+     // academie get selects data
+     app.get("/selects",async(req,res)=>{
+      const result = await selectCollection.find().toArray();
+      res.send(result)
+     })
 
 
     // Send a ping to confirm a successful connection
