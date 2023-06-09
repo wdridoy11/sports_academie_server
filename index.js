@@ -56,6 +56,13 @@ async function run() {
       res.send(result)
     })
 
+    // academie get users data
+    app.get("/users",async(req,res)=>{
+      const body = req.body;
+      const result = await usersCollection.insertOne(body);
+      res.send(result)
+    })
+
     // academie users admin
     app.patch("/users/admin/:id",async(req,res)=>{
       const id = req.params.id;
