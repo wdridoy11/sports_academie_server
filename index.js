@@ -28,21 +28,36 @@ async function run() {
 
     const academieInstructorsCollection = client.db("sports_academies").collection("academies_instructors");
     const classeCollection = client.db("sports_academies").collection("classe");
+    const usersCollection = client.db("sports_academies").collection("users");
     
     // academie Instructors data get
     app.get("/instructors",async(req,res)=>{
         const result = await academieInstructorsCollection.find().toArray();
         res.send(result);
     })
+
+    // academie Instructors create class 
+    app.post('/add_classes',async(req,res)=>{
+      const body = req.body;
+      const result = await classeCollection.insertOne(body);
+      res.send(result)
+    })
+
+    // academie get classes data
+    app.get("/classes",async(req,res)=>{
+      const result = await classeCollection.find().toArray();
+      res.send(result);
+    })
+
+    // academie users set data
+    app.post("/users",async(req,res)=>{
+      const body = req.body;
+      const result = await usersCollection.insertOne(body);
+      res.send(result)
+    })
+
+    // academie users set data
     
-  // academie Instructors create class 
-  app.post('/add_classes',async(req,res)=>{
-    const body = req.body;
-    const result = await classeCollection.insertOne(body);
-    res.send(result)
-  })
-
-
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
