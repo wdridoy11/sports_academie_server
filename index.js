@@ -2,6 +2,7 @@ const expresss = require('express');
 const app = expresss ();
 require('dotenv').config()
 const cors = require("cors")
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY)
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -10,9 +11,24 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors())
 app.use(expresss.json())
 
+const verifyJWT=(req,res,next)=>{
+  const authorization = req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({error:true, message:"User Unauthorized access"})
+  }
+  const token = authorization.split(" ")[1]
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err, decoded)=>{
+    if(err){
+      return res.status(401).send({error:true, message:"User Unauthorized access"})
+    }
+    req.decoded= decoded;
+    next();
+  })
+}
+
+
 // mongodb connect
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.v2v9b72.mongodb.net/?retryWrites=true&w=majority`;
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -32,6 +48,13 @@ async function run() {
     const usersCollection = client.db("sports_academies").collection("users");
     const selectCollection = client.db("sports_academies").collection("selects");
     
+
+    app.post("/jwt",(req,res)=>{
+      const user = req.body;
+      const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:"1h"});
+      res.send({token})
+    })
+
     // academie Instructors data get
     app.get("/instructors",async(req,res)=>{
         const result = await academieInstructorsCollection.find().toArray();
