@@ -59,8 +59,7 @@ async function run() {
 
     // academie get users data
     app.get("/users",async(req,res)=>{
-      const body = req.body;
-      const result = await usersCollection.insertOne(body);
+      const result = await usersCollection.find().toArray();
       res.send(result)
     })
 
@@ -74,22 +73,37 @@ async function run() {
         }
       }
       const result = await classeCollection.updateOne(filter,updateDoc)
-    res.send(result)
+      res.send(result)
     })
 
      // academie set selects data
      app.post("/selects",async(req,res)=>{
-      const id = req.params.id;
-      const filter = {_id : new ObjectId(id)};
-      const result = await selectCollection.insertOne(filter);
+      const body = req.body;
+      const result = await selectCollection.insertOne(body);
       res.send(result)
      })
+
      // academie get selects data
      app.get("/selects",async(req,res)=>{
       const result = await selectCollection.find().toArray();
       res.send(result)
      })
 
+    // academie selects delete
+    app.delete("/selects/:id",async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const result = await selectCollection.deleteOne(filter)
+      res.send(result)
+    })
+
+    // academie user delete
+    app.delete("/users/:id",async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const result = await usersCollection.deleteOne(filter)
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
