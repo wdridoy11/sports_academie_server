@@ -3,6 +3,7 @@ const app = expresss ();
 require('dotenv').config()
 const cors = require("cors")
 const port = process.env.PORT || 5000;
+const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY)
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
@@ -88,6 +89,22 @@ async function run() {
       const result = await selectCollection.find().toArray();
       res.send(result)
      })
+
+    //  stripe payment methord
+    app.post("/create_payment_intent",async(req,res)=>{
+      const {price} = req.body;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount:amount,
+        currency:"usd",
+        payment_method_types:[
+          "card"
+        ]
+      })
+      res.send({
+        clientSecret:paymentIntent.client_secret
+      })
+    })
 
     // academie selects delete
     app.delete("/selects/:id",async(req,res)=>{
