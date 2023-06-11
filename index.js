@@ -96,7 +96,20 @@ async function run() {
           role:"admin"
         }
       }
-      const result = await classeCollection.updateOne(filter,updateDoc)
+      const result = await usersCollection.updateOne(filter,updateDoc)
+      res.send(result)
+    })
+
+    // academie users admin
+    app.patch("/users/instructor/:id",async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id : new ObjectId(id)};
+      const updateDoc = {
+        $set:{
+          role:"instructor"
+        }
+      }
+      const result = await usersCollection.updateOne(filter,updateDoc)
       res.send(result)
     })
 
@@ -109,12 +122,6 @@ async function run() {
 
      // academie get selects data
      app.get("/selects", async(req,res)=>{
-      // const email = req.params.email;
-      // console.log(email)
-      // if(!email){
-      //   res.send([])
-      // }
-      // const query = {email: email}
       const result = await selectCollection.find().toArray();
       res.send(result)
      })
@@ -134,6 +141,7 @@ async function run() {
         clientSecret:paymentIntent.client_secret
       })
     })
+
 
 
     // admin users
