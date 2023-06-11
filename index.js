@@ -61,8 +61,8 @@ async function run() {
         res.send(result);
     })
 
-    // academie Instructors create class 
-    app.post('/add_classes',async(req,res)=>{
+    // academie classes create class 
+    app.post('/add_classes', async(req,res)=>{
       const body = req.body;
       const result = await classeCollection.insertOne(body);
       res.send(result)
@@ -82,7 +82,7 @@ async function run() {
     })
 
     // academie get users data
-    app.get("/users",async(req,res)=>{
+    app.get("/users", async(req,res)=>{
       const result = await usersCollection.find().toArray();
       res.send(result)
     })
@@ -108,7 +108,13 @@ async function run() {
      })
 
      // academie get selects data
-     app.get("/selects",async(req,res)=>{
+     app.get("/selects", async(req,res)=>{
+      // const email = req.params.email;
+      // console.log(email)
+      // if(!email){
+      //   res.send([])
+      // }
+      // const query = {email: email}
       const result = await selectCollection.find().toArray();
       res.send(result)
      })
@@ -128,6 +134,17 @@ async function run() {
         clientSecret:paymentIntent.client_secret
       })
     })
+
+
+    // admin users
+    app.get('/users/admin/:email',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email:email}
+      const user = await usersCollection.findOne(query);
+      const result = {admin : user?.role === "admin"}
+      res.send(result);
+    })
+
 
     // academie selects delete
     app.delete("/selects/:id",async(req,res)=>{
