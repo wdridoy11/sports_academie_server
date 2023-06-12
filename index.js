@@ -162,12 +162,21 @@ async function run() {
       res.send(result);
     })
 
-    // admin users
+    // instructor users
     app.get('/users/instructor/:email',async(req,res)=>{
       const email = req.params.email;
       const query = {email:email}
       const user = await usersCollection.findOne(query);
       const result = {admin : user?.role === "instructor"}
+      res.send(result);
+    })
+
+    // student users
+    app.get('/users/student/:email',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email:email}
+      const user = await usersCollection.findOne(query);
+      const result = {admin : user?.role === "student"}
       res.send(result);
     })
 
