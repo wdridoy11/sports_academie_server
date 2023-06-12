@@ -60,6 +60,12 @@ async function run() {
         const result = await academieInstructorsCollection.find().toArray();
         res.send(result);
     })
+    
+    app.post("/instructors",async(req,res)=>{
+      const body = req.params.body;
+        const result = await academieInstructorsCollection.insertOne(body)
+        res.send(result);
+    })
 
     // academie classes create class 
     app.post('/add_classes', async(req,res)=>{
@@ -77,7 +83,10 @@ async function run() {
     // academie users set data
     app.post("/users",async(req,res)=>{
       const body = req.body;
-      const result = await usersCollection.insertOne(body);
+      const result = await usersCollection.insertOne({
+        ...body,
+        role:"student"
+      });
       res.send(result)
     })
 
@@ -150,6 +159,15 @@ async function run() {
       const query = {email:email}
       const user = await usersCollection.findOne(query);
       const result = {admin : user?.role === "admin"}
+      res.send(result);
+    })
+
+    // admin users
+    app.get('/users/instructor/:email',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email:email}
+      const user = await usersCollection.findOne(query);
+      const result = {admin : user?.role === "instructor"}
       res.send(result);
     })
 
