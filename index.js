@@ -70,7 +70,10 @@ async function run() {
     // academie classes create class 
     app.post('/add_classes', async(req,res)=>{
       const body = req.body;
-      const result = await classeCollection.insertOne(body);
+      const result = await classeCollection.insertOne({
+        ...body,
+        available_seats:Number(body.available_seats)
+      });
       res.send(result)
     })
 
