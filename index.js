@@ -47,12 +47,67 @@ async function run() {
     const classeCollection = client.db("sports_academies").collection("classe");
     const usersCollection = client.db("sports_academies").collection("users");
     const selectCollection = client.db("sports_academies").collection("selects");
+    const manageClassesCollection = client.db("sports_academies").collection("manage_class");
     
 
     app.post("/jwt",(req,res)=>{
       const user = req.body;
       const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:"1h"});
       res.send({token})
+    })
+
+    // manage_class data  send status pending
+    app.post("/manage_classes",async(req,res)=>{
+      const body = req.body;
+      const result = await manageClassesCollection.insertOne({...body,status:"pending"})
+      res.send(result)
+    })
+
+    // manage_class data  send status pending
+    app.get("/manage_classes",async(req,res)=>{
+      const result = await manageClassesCollection.find().toArray();
+      res.send(result)
+    })
+
+     // manage_classes find specific data using id
+     app.get("/manage_classes/:id", async (req, res) => {
+       const id = req.params.id;
+       const filter = { _id: new ObjectId(id) };
+       const result = await manageClassesCollection.findOne(filter);
+       res.send(result);
+     });
+
+    // toy data update
+    app.put("/update_class/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const body = req.body;
+      const updateDoc = {
+        $set: {
+          price: body.price,
+          class_name: body.class_name,
+          class_image: body.class_image,
+          available_seats: body.available_seats,
+        },
+      };
+      const result = await manageClassesCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      res.send(result);
+    });
+    
+    // academie users admin
+    app.patch("/manage_classes/:id",async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id : new ObjectId(id)};
+      const updateDoc = {
+        $set:{
+          status:"approved"
+        }
+      }
+      const result = await manageClassesCollection.updateOne(filter,updateDoc)
+      res.send(result)
     })
 
     // academie Instructors data get
@@ -132,11 +187,15 @@ async function run() {
       res.send(result)
      })
 
-     // academie get selects data
-     app.get("/selects", async(req,res)=>{
-      const result = await selectCollection.find().toArray();
-      res.send(result)
-     })
+    //specific user specific data using email
+    app.get("/selects", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+      const result = await selectCollection.find(query).toArray();
+      res.send(result);
+    });
 
     //  stripe payment methord
     app.post("/create_payment_intent",async(req,res)=>{
@@ -153,8 +212,6 @@ async function run() {
         clientSecret:paymentIntent.client_secret
       })
     })
-
-
 
     // admin users
     app.get('/users/admin/:email',async(req,res)=>{
