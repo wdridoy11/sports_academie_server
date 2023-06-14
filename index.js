@@ -167,7 +167,6 @@ async function run() {
 
      // academie student selects class
      app.post("/selects",async(req,res)=>{
-      let id = req.body._id;
       const body = req.body;
       const result = await selectCollection.insertOne(body);
       res.send(result)
