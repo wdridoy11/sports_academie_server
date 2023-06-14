@@ -11,6 +11,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors())
 app.use(expresss.json())
 
+// verifyJWT
 const verifyJWT=(req,res,next)=>{
   const authorization = req.headers.authorization;
   if(!authorization){
@@ -44,32 +45,31 @@ async function run() {
      client.connect();
 
     const academieInstructorsCollection = client.db("sports_academies").collection("academies_instructors");
-    const classeCollection = client.db("sports_academies").collection("classe");
     const usersCollection = client.db("sports_academies").collection("users");
     const selectCollection = client.db("sports_academies").collection("selects");
     const manageClassesCollection = client.db("sports_academies").collection("manage_class");
     
-
+  // jwt post 
     app.post("/jwt",(req,res)=>{
       const user = req.body;
       const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:"1h"});
       res.send({token})
     })
 
-    // manage_class data  send status pending
+    // manage class send data default status pending
     app.post("/manage_classes",async(req,res)=>{
       const body = req.body;
       const result = await manageClassesCollection.insertOne({...body,status:"pending"})
       res.send(result)
     })
 
-    // manage_class data  send status pending
+    // manage class data get from mongodb
     app.get("/manage_classes",async(req,res)=>{
       const result = await manageClassesCollection.find().toArray();
       res.send(result)
     })
 
-     // manage_classes find specific data using id
+     // manage classes find specific data using id
      app.get("/manage_classes/:id", async (req, res) => {
        const id = req.params.id;
        const filter = { _id: new ObjectId(id) };
@@ -77,7 +77,7 @@ async function run() {
        res.send(result);
      });
 
-    // toy data update
+    // manage classes update specific data using id
     app.put("/update_class/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -97,7 +97,7 @@ async function run() {
       res.send(result);
     });
     
-    // academie users admin
+    // manage classes status approved
     app.patch("/manage_classes/:id",async(req,res)=>{
       const id = req.params.id;
       const filter = {_id : new ObjectId(id)};
@@ -110,35 +110,20 @@ async function run() {
       res.send(result)
     })
 
-    // academie Instructors data get
+    // academie Instructors get data from mongodb
     app.get("/instructors",async(req,res)=>{
         const result = await academieInstructorsCollection.find().toArray();
         res.send(result);
     })
     
+    // instructors send data 
     app.post("/instructors",async(req,res)=>{
       const body = req.params.body;
-        const result = await academieInstructorsCollection.insertOne(body)
-        res.send(result);
-    })
-
-    // academie classes create class 
-    app.post('/add_classes', async(req,res)=>{
-      const body = req.body;
-      const result = await classeCollection.insertOne({
-        ...body,
-        available_seats:Number(body.available_seats)
-      });
-      res.send(result)
-    })
-
-    // academie get classes data
-    app.get("/classes",async(req,res)=>{
-      const result = await classeCollection.find().toArray();
+      const result = await academieInstructorsCollection.insertOne(body)
       res.send(result);
     })
 
-    // academie users set data
+    // academie users set data by default role student
     app.post("/users",async(req,res)=>{
       const body = req.body;
       const result = await usersCollection.insertOne({
@@ -148,13 +133,13 @@ async function run() {
       res.send(result)
     })
 
-    // academie get users data
+    // academie get user from database
     app.get("/users", async(req,res)=>{
       const result = await usersCollection.find().toArray();
       res.send(result)
     })
 
-    // academie users admin
+    // academie users role change role admin
     app.patch("/users/admin/:id",async(req,res)=>{
       const id = req.params.id;
       const filter = {_id : new ObjectId(id)};
@@ -167,7 +152,7 @@ async function run() {
       res.send(result)
     })
 
-    // academie users admin
+    // academie users role change role instructor
     app.patch("/users/instructor/:id",async(req,res)=>{
       const id = req.params.id;
       const filter = {_id : new ObjectId(id)};
@@ -180,8 +165,9 @@ async function run() {
       res.send(result)
     })
 
-     // academie set selects data
+     // academie student selects class
      app.post("/selects",async(req,res)=>{
+      let id = req.body._id;
       const body = req.body;
       const result = await selectCollection.insertOne(body);
       res.send(result)
@@ -194,7 +180,7 @@ async function run() {
         query = { email: req.query.email };
       }
       const result = await selectCollection.find(query).toArray();
-      res.send(result);
+      res.send(result)
     });
 
     //  stripe payment methord
@@ -213,7 +199,7 @@ async function run() {
       })
     })
 
-    // admin users
+    // academie admin
     app.get('/users/admin/:email',async(req,res)=>{
       const email = req.params.email;
       const query = {email:email}
@@ -222,7 +208,7 @@ async function run() {
       res.send(result);
     })
 
-    // instructor users
+    // academie instructor
     app.get('/users/instructor/:email',async(req,res)=>{
       const email = req.params.email;
       const query = {email:email}
@@ -231,7 +217,7 @@ async function run() {
       res.send(result);
     })
 
-    // student users
+    // academie student
     app.get('/users/student/:email',async(req,res)=>{
       const email = req.params.email;
       const query = {email:email}
@@ -241,7 +227,7 @@ async function run() {
     })
 
 
-    // academie selects delete
+    // academie selects class delete
     app.delete("/selects/:id",async(req,res)=>{
       const id = req.params.id;
       const filter = {_id: new ObjectId(id)}
